@@ -51,7 +51,6 @@ export declare class AutoGenerator {
     private addTypeScriptAssociationMixins;
     private getTypeScriptTableOverrideImports;
     private addTypeScriptFields;
-    private getTypeScriptFieldOptional;
     private getTypeScriptType;
     private getTypeScriptFieldType;
     private getEnumValues;
