@@ -178,6 +178,8 @@ export interface AutoOptions {
   username?: string;
   /** Whether to export views (default false) */
   views?: boolean;
+  /** Add additional virtual fields */
+  virtualFields?: VirtualFieldsOption;
 }
 
 export type TSField = { special: string[]; elementType: string; } & ColumnDescription;
@@ -223,6 +225,12 @@ export function recase(opt: CaseOption | CaseFileOption | undefined, val: string
   return val;
 }
 
+export interface VirtualFieldsColumnOptions {
+  type: string;
+} 
+export type TableVirtualFields = { [columnName: string]: VirtualFieldsColumnOptions }
+export type VirtualFieldsOption = { [tableName: string]: TableVirtualFields }
+
 /**
  * @type Optional. Name of the type
  * @source Optional. File path of the type relative to file in the directory.
@@ -238,6 +246,13 @@ export interface ColumnTypeOverride {
 }
 export type TableTypeOverride = { [columnName: string]: ColumnTypeOverride | undefined };
 export type TableTypeOverrides = { [tableName: string]: TableTypeOverride | undefined }
+
+export enum NullableFieldTypes {
+  Null = "NULL",
+  Optional = "OPTIONAL",
+  NullAndOptional = "NULL_AND_OPTIONAL"
+}
+
 /**
  * @tables {
  *  roles: {
@@ -247,9 +262,9 @@ export type TableTypeOverrides = { [tableName: string]: TableTypeOverride | unde
  *   }
  *  }
  * }
- * @useOptionalForNullColumns use optional(?) otherwise use null, for nullable columns. Default false
+ * @nullableFieldType use "NULL", "OPTIONAL", OR "NULL_AND_OPTIONAL" for nullable table columns. Default "NULL_AND_OPTIONAL"
  */
 export interface TypeOverrides {
   tables?: TableTypeOverrides;
-  useOptionalForNullColumns?: boolean;
+  nullableFieldType?: NullableFieldTypes;
 }

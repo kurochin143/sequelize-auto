@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { ColumnDescription } from "sequelize/types";
 import { DialectOptions, FKSpec } from "./dialects/dialect-options";
-import { AutoOptions, CaseFileOption, CaseOption, Field, IndexSpec, LangOption, qNameJoin, qNameSplit, recase, Relation, TableData, TSField, singularize, pluralize, TypeOverrides, TableTypeOverride, ColumnTypeOverride } from "./types";
+import { AutoOptions, CaseFileOption, CaseOption, Field, IndexSpec, LangOption, qNameJoin, qNameSplit, recase, Relation, TableData, TSField, singularize, pluralize, TypeOverrides, TableTypeOverride, ColumnTypeOverride, NullableFieldTypes, VirtualFieldsOption, TableVirtualFields } from "./types";
 
 /** Generates text from each table in TableData */
 export class AutoGenerator {
@@ -23,6 +23,7 @@ export class AutoGenerator {
     schema?: string;
     singularize: boolean;
     typeOverrides?: TypeOverrides;
+    virtualFields?: VirtualFieldsOption;
   };
 
   constructor(tableData: TableData, dialect: DialectOptions, options: AutoOptions) {
@@ -105,18 +106,24 @@ export class AutoGenerator {
         });
 
         const typeOverrides = this.options.typeOverrides;
+        const virtualFields = this.options.virtualFields;
         let tableTypeOverride: TableTypeOverride | undefined;
-        if (typeOverrides) {
-          if (typeOverrides.tables && tableNameOrig) {
+        let tableVirtualFields: TableVirtualFields | undefined;
+        if (typeOverrides && tableNameOrig) {
+          if (typeOverrides.tables) {
             tableTypeOverride = typeOverrides.tables[tableNameOrig];
             if (tableTypeOverride) {
               str += this.getTypeScriptTableOverrideImports(tableTypeOverride);
             }
           }
+
+          if (virtualFields) {
+            tableVirtualFields = virtualFields[tableNameOrig];
+          }
         }
 
         str += "\nexport interface #TABLE#Attributes {\n";
-        str += this.addTypeScriptFields(table, true, tableTypeOverride, typeOverrides?.useOptionalForNullColumns) + "}\n\n";
+        str += this.addTypeScriptFields(table, true, tableVirtualFields, tableTypeOverride, typeOverrides?.nullableFieldType) + "}\n\n";
 
         const primaryKeys = this.getTypeScriptPrimaryKeys(table);
 
@@ -135,7 +142,7 @@ export class AutoGenerator {
         }
 
         str += "export class #TABLE# extends Model<#TABLE#Attributes, #TABLE#CreationAttributes> implements #TABLE#Attributes {\n";
-        str += this.addTypeScriptFields(table, false, tableTypeOverride, typeOverrides?.useOptionalForNullColumns);
+        str += this.addTypeScriptFields(table, false, tableVirtualFields, tableTypeOverride, typeOverrides?.nullableFieldType);
         str += "\n" + associations.str;
         str += "\n" + this.space[1] + "static initModel(sequelize: Sequelize.Sequelize): typeof " + tableName + " {\n";
         str += this.space[2] + tableName + ".init({\n";
@@ -170,6 +177,13 @@ export class AutoGenerator {
 
       str += this.addField(table, field);
     });
+
+    if (this.options.virtualFields) {
+      const virtualColumns = this.options.virtualFields[tableNameOrig!];
+      _.each(virtualColumns, (columnOptions, columnName) => {
+        str += this.addVirtualField(columnName);
+      });
+    }
 
     // trim off last ",\n"
     str = str.substring(0, str.length - 2) + "\n";
@@ -401,6 +415,16 @@ export class AutoGenerator {
 
     // removes the last `,` within the attribute options
     str = str.trim().replace(/,+$/, '') + "\n";
+    str = space[2] + str + space[2] + "},\n";
+    return str;
+  }
+
+  private addVirtualField(columnName: string) {
+    const space = this.space;
+
+    const fieldName = recase(this.options.caseProp, columnName);
+    let str = this.quoteName(fieldName) + ": {\n";
+    str += space[3] + "type: DataTypes.VIRTUAL,\n"
     str = space[2] + str + space[2] + "},\n";
     return str;
   }
@@ -728,9 +752,10 @@ export class AutoGenerator {
     return "";
   }
 
-  private addTypeScriptFields(table: string, isInterface: boolean, tableTypeOverride: TableTypeOverride | undefined, useOptionalForNullColumns: boolean | undefined) {
+  private addTypeScriptFields(table: string, isInterface: boolean, tableVirtualFields: TableVirtualFields | undefined, tableTypeOverride: TableTypeOverride | undefined, nullableFieldType: NullableFieldTypes | undefined) {
     const sp = this.space[1];
     const fields = _.keys(this.tables[table]);
+
     let str = '';
     const notOptional = isInterface ? '' : '!';
     fields.forEach(field => {
@@ -745,11 +770,17 @@ export class AutoGenerator {
         // override
         isOptional = columnTypeOverride.isOptional;
       } else {
-        isOptional = fieldObj.allowNull && !!useOptionalForNullColumns;
+        isOptional = fieldObj.allowNull && nullableFieldType !== NullableFieldTypes.Null;
       }
       str += `${sp}${name}${isOptional ? '?' : notOptional}: ` +
-        `${columnTypeOverride && columnTypeOverride.type !== undefined ? columnTypeOverride.type : (this.getTypeScriptType(table, field) + (fieldObj.allowNull && !useOptionalForNullColumns ? " | null" : ""))};\n`;
+        `${columnTypeOverride && columnTypeOverride.type !== undefined ? columnTypeOverride.type : (this.getTypeScriptType(table, field) + (fieldObj.allowNull && nullableFieldType !== NullableFieldTypes.Optional ? " | null" : ""))};\n`;
     });
+
+    _.each(tableVirtualFields, (columnOptions, columnName) => {
+      const name = this.quoteName(recase(this.options.caseProp, columnName));
+      str += `${sp}${name}?: ${columnOptions.type};\n`
+    });
+
     return str;
   }
 
