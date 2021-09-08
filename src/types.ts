@@ -178,6 +178,8 @@ export interface AutoOptions {
   username?: string;
   /** Whether to export views (default false) */
   views?: boolean;
+  /** Add additional virtual fields */
+  virtualFields?: VirtualFieldsOption;
 }
 
 export type TSField = { special: string[]; elementType: string; } & ColumnDescription;
@@ -222,6 +224,12 @@ export function recase(opt: CaseOption | CaseFileOption | undefined, val: string
   }
   return val;
 }
+
+export interface VirtualFieldsColumnOptions {
+  type: string;
+} 
+export type TableVirtualFields = { [columnName: string]: VirtualFieldsColumnOptions }
+export type VirtualFieldsOption = { [tableName: string]: TableVirtualFields }
 
 /**
  * @type Optional. Name of the type
