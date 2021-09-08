@@ -1,6 +1,6 @@
 import { ColumnDescription } from "sequelize/types";
 import { DialectOptions, FKSpec } from "./dialects/dialect-options";
-import { AutoOptions, CaseOption, IndexSpec, LangOption, Relation, TableData, TypeOverrides } from "./types";
+import { AutoOptions, CaseFileOption, CaseOption, IndexSpec, LangOption, Relation, TableData, TypeOverrides, VirtualFieldsOption } from "./types";
 /** Generates text from each table in TableData */
 export declare class AutoGenerator {
     dialect: DialectOptions;
@@ -28,11 +28,12 @@ export declare class AutoGenerator {
         lang?: LangOption;
         caseModel?: CaseOption;
         caseProp?: CaseOption;
-        caseFile?: CaseOption;
+        caseFile?: CaseFileOption;
         additional?: any;
         schema?: string;
         singularize: boolean;
         typeOverrides?: TypeOverrides;
+        virtualFields?: VirtualFieldsOption;
     };
     constructor(tableData: TableData, dialect: DialectOptions, options: AutoOptions);
     makeHeaderTemplate(): string;
@@ -41,6 +42,7 @@ export declare class AutoGenerator {
     };
     private addTable;
     private addField;
+    private addVirtualField;
     private addIndexes;
     /** Get the sequelize type from the Field */
     private getSqType;

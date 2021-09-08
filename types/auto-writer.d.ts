@@ -1,5 +1,5 @@
 import { FKSpec, TableData } from ".";
-import { AutoOptions, CaseOption, LangOption, Relation } from "./types";
+import { AutoOptions, CaseFileOption, CaseOption, LangOption, Relation } from "./types";
 /** Writes text into files from TableData.text, and writes init-models */
 export declare class AutoWriter {
     tableText: {
@@ -12,7 +12,7 @@ export declare class AutoWriter {
     };
     relations: Relation[];
     options: {
-        caseFile?: CaseOption;
+        caseFile?: CaseFileOption;
         caseModel?: CaseOption;
         caseProp?: CaseOption;
         directory: string;

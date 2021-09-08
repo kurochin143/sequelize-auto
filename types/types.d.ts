@@ -100,10 +100,19 @@ export declare type LangOption = "es5" | "es6" | "esm" | "ts" | "esmd";
  * "p" PascalCase |
  * "u" UPPER_CASE */
 export declare type CaseOption = "c" | "l" | "o" | "p" | "u";
+/**
+ * "c" camelCase |
+ * "k" kebab-case |
+ * "l" lower_case |
+ * "o" original (db) |
+ * "p" PascalCase |
+ * "u" UPPER_CASE
+ */
+export declare type CaseFileOption = "k" | CaseOption;
 export interface AutoOptions {
     additional?: any;
     /** Case of file names */
-    caseFile?: CaseOption;
+    caseFile?: CaseFileOption;
     /** Case of model names */
     caseModel?: CaseOption;
     /** Case of property names */
@@ -154,6 +163,8 @@ export interface AutoOptions {
     username?: string;
     /** Whether to export views (default false) */
     views?: boolean;
+    /** Add additional virtual fields */
+    virtualFields?: VirtualFieldsOption;
 }
 export declare type TSField = {
     special: string[];
@@ -165,7 +176,16 @@ export declare function pluralize(s: string): string;
 /** Uses Inflector via Sequelize.  Use `Utils.useInflection({ singularize: fn, pluralize: fn2 })` to configure. */
 export declare function singularize(s: string): string;
 /** Change casing of val string according to opt [c|l|o|p|u]  */
-export declare function recase(opt: CaseOption | undefined, val: string | null, singular?: boolean): string;
+export declare function recase(opt: CaseOption | CaseFileOption | undefined, val: string | null, singular?: boolean): string;
+export interface VirtualFieldsColumnOptions {
+    type: string;
+}
+export declare type TableVirtualFields = {
+    [columnName: string]: VirtualFieldsColumnOptions;
+};
+export declare type VirtualFieldsOption = {
+    [tableName: string]: TableVirtualFields;
+};
 /**
  * @type Optional. Name of the type
  * @source Optional. File path of the type relative to file in the directory.
@@ -185,6 +205,11 @@ export declare type TableTypeOverride = {
 export declare type TableTypeOverrides = {
     [tableName: string]: TableTypeOverride | undefined;
 };
+export declare enum NullableFieldTypes {
+    Null = "NULL",
+    Optional = "OPTIONAL",
+    NullAndOptional = "NULL_AND_OPTIONAL"
+}
 /**
  * @tables {
  *  roles: {
@@ -194,9 +219,9 @@ export declare type TableTypeOverrides = {
  *   }
  *  }
  * }
- * @useOptionalForNullColumns use optional(?) otherwise use null, for nullable columns. Default false
+ * @nullableFieldType use "NULL", "OPTIONAL", OR "NULL_AND_OPTIONAL" for nullable table columns. Default "NULL_AND_OPTIONAL"
  */
 export interface TypeOverrides {
     tables?: TableTypeOverrides;
-    useOptionalForNullColumns?: boolean;
+    nullableFieldType?: NullableFieldTypes;
 }
