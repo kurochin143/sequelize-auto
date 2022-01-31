@@ -205,11 +205,7 @@ export declare type TableTypeOverride = {
 export declare type TableTypeOverrides = {
     [tableName: string]: TableTypeOverride | undefined;
 };
-export declare enum NullableFieldTypes {
-    Null = "NULL",
-    Optional = "OPTIONAL",
-    NullAndOptional = "NULL_AND_OPTIONAL"
-}
+export declare type NullableFieldTypes = "NULL" | "OPTIONAL" | "NULL_AND_OPTIONAL";
 /**
  * @tables {
  *  roles: {
