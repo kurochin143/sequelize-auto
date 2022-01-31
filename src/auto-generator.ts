@@ -770,10 +770,10 @@ export class AutoGenerator {
         // override
         isOptional = columnTypeOverride.isOptional;
       } else {
-        isOptional = fieldObj.allowNull && nullableFieldType !== NullableFieldTypes.Null;
+        isOptional = fieldObj.allowNull && nullableFieldType !== "NULL";
       }
       str += `${sp}${name}${isOptional ? '?' : notOptional}: ` +
-        `${columnTypeOverride && columnTypeOverride.type !== undefined ? columnTypeOverride.type : (this.getTypeScriptType(table, field) + (fieldObj.allowNull && nullableFieldType !== NullableFieldTypes.Optional ? " | null" : ""))};\n`;
+        `${columnTypeOverride && columnTypeOverride.type !== undefined ? columnTypeOverride.type : (this.getTypeScriptType(table, field) + (fieldObj.allowNull && nullableFieldType !== "OPTIONAL" ? " | null" : ""))};\n`;
     });
 
     _.each(tableVirtualFields, (columnOptions, columnName) => {
