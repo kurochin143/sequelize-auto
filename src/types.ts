@@ -247,11 +247,7 @@ export interface ColumnTypeOverride {
 export type TableTypeOverride = { [columnName: string]: ColumnTypeOverride | undefined };
 export type TableTypeOverrides = { [tableName: string]: TableTypeOverride | undefined }
 
-export enum NullableFieldTypes {
-  Null = "NULL",
-  Optional = "OPTIONAL",
-  NullAndOptional = "NULL_AND_OPTIONAL"
-}
+export declare type NullableFieldTypes = "NULL" | "OPTIONAL" | "NULL_AND_OPTIONAL";
 
 /**
  * @tables {

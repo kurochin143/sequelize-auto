@@ -630,7 +630,7 @@ export class AutoGenerator {
             str += `${sp}${rel.childProp}!: ${rel.childModel};\n`;
             str += `${sp}get${pchild}!: Sequelize.HasOneGetAssociationMixin<${rel.childModel}>;\n`;
             str += `${sp}set${pchild}!: Sequelize.HasOneSetAssociationMixin<${rel.childModel}, ${rel.childModel}Id>;\n`;
-            str += `${sp}create${pchild}!: Sequelize.HasOneCreateAssociationMixin<${rel.childModel}CreationAttributes>;\n`;
+            str += `${sp}create${pchild}!: Sequelize.HasOneCreateAssociationMixin<${rel.childModel}>;\n`;
             needed[rel.childTable].add(rel.childModel);
             needed[rel.childTable].add(`${rel.childModel}Id`);
             needed[rel.childTable].add(`${rel.childModel}CreationAttributes`);
@@ -770,10 +770,10 @@ export class AutoGenerator {
         // override
         isOptional = columnTypeOverride.isOptional;
       } else {
-        isOptional = fieldObj.allowNull && nullableFieldType !== NullableFieldTypes.Null;
+        isOptional = fieldObj.allowNull && nullableFieldType !== "NULL";
       }
       str += `${sp}${name}${isOptional ? '?' : notOptional}: ` +
-        `${columnTypeOverride && columnTypeOverride.type !== undefined ? columnTypeOverride.type : (this.getTypeScriptType(table, field) + (fieldObj.allowNull && nullableFieldType !== NullableFieldTypes.Optional ? " | null" : ""))};\n`;
+        `${columnTypeOverride && columnTypeOverride.type !== undefined ? columnTypeOverride.type : (this.getTypeScriptType(table, field) + (fieldObj.allowNull && nullableFieldType !== "OPTIONAL" ? " | null" : ""))};\n`;
     });
 
     _.each(tableVirtualFields, (columnOptions, columnName) => {
