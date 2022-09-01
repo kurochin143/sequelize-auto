@@ -5,6 +5,7 @@ export declare class AutoRelater {
     caseModel: CaseOption;
     caseProp: CaseOption;
     singularize: boolean;
+    pkSuffixes: string[];
     relations: Relation[];
     private usedChildNames;
     constructor(options: AutoOptions);

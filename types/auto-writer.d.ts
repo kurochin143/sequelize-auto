@@ -11,6 +11,7 @@ export declare class AutoWriter {
         };
     };
     relations: Relation[];
+    space: string[];
     options: {
         caseFile?: CaseFileOption;
         caseModel?: CaseOption;
@@ -21,6 +22,9 @@ export declare class AutoWriter {
         noInitModels?: boolean;
         noWrite?: boolean;
         singularize?: boolean;
+        useDefine?: boolean;
+        spaces?: boolean;
+        indentation?: number;
     };
     constructor(tableData: TableData, options: AutoOptions);
     write(): Promise<void> | Promise<void[]>;
@@ -30,6 +34,5 @@ export declare class AutoWriter {
     private createAssociations;
     private createTsInitString;
     private createES5InitString;
-    createESMDInitString(tables: string[], assoc: string): string;
     private createESMInitString;
 }

@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { check as isReserved } from "reserved-words";
 import { Utils } from "sequelize";
 import { ColumnDescription, Dialect } from "sequelize/types";
 import { FKSpec } from "./dialects/dialect-options";
@@ -107,7 +108,7 @@ export function qNameJoin(schema: string | undefined, table: string | undefined)
 }
 
 /** Language of output model files */
-export declare type LangOption = "es5" | "es6" | "esm" | "ts" | "esmd";
+export declare type LangOption = "es5" | "es6" | "esm" | "ts";
 
 /** "c" camelCase |
  * "l" lower_case |
@@ -152,6 +153,8 @@ export interface AutoOptions {
   lang?: LangOption;
   /** Whether to avoid creating alias property in relations */
   noAlias?: boolean;
+  /** Whether to skip writing index information */
+  noIndexes?: boolean;
   /** Whether to skip writing the init-models file */
   noInitModels?: boolean;
   /** Whether to skip writing the files */
@@ -166,6 +169,8 @@ export interface AutoOptions {
   singularize: boolean;
   /** Tables to skip exporting */
   skipTables?: string[];
+  /** Fields to skip exporting */
+  skipFields?: string[];
   /** Whether to indent with spaces instead of tabs (default true) */
   spaces?: boolean;
   /** File where database is stored (sqlite only) */
@@ -178,8 +183,10 @@ export interface AutoOptions {
   username?: string;
   /** Whether to export views (default false) */
   views?: boolean;
-  /** Add additional virtual fields */
-  virtualFields?: VirtualFieldsOption;
+  /** Primary Key Suffixes to trim (default "id") */
+  pkSuffixes?: string[];
+  /** Use `sequelize.define` instead of `init` for model initialization.  See issues #527, #559, #573 */
+  useDefine: boolean;
 }
 
 export type TSField = { special: string[]; elementType: string; } & ColumnDescription;
@@ -225,12 +232,6 @@ export function recase(opt: CaseOption | CaseFileOption | undefined, val: string
   return val;
 }
 
-export interface VirtualFieldsColumnOptions {
-  type: string;
-} 
-export type TableVirtualFields = { [columnName: string]: VirtualFieldsColumnOptions }
-export type VirtualFieldsOption = { [tableName: string]: TableVirtualFields }
-
 /**
  * @type Optional. Name of the type
  * @source Optional. File path of the type relative to file in the directory.
@@ -263,4 +264,25 @@ export declare type NullableFieldTypes = "NULL" | "OPTIONAL" | "NULL_AND_OPTIONA
 export interface TypeOverrides {
   tables?: TableTypeOverrides;
   nullableFieldType?: NullableFieldTypes;
+}
+const tsNames = ["DataTypes", "Model", "Optional", "Sequelize"];
+export function makeTableName(opt: CaseOption | undefined, tableNameOrig: string | null, singular = false, lang = "es5") {
+  let name = recase(opt, tableNameOrig, singular);
+  if (isReserved(name) || (lang == "ts" && tsNames.includes(name))) {
+    name += "_";
+  }
+  return name;
+}
+
+/** build the array of indentation strings */
+export function makeIndent(spaces: boolean | undefined, indent: number | undefined): string[] {
+  let sp = '';
+  for (let x = 0; x < (indent || 2); ++x) {
+    sp += (spaces === true ? ' ' : "\t");
+  }
+  let space = [];
+  for (let i = 0; i < 6; i++) {
+    space[i] = sp.repeat(i);
+  }
+  return space;
 }

@@ -1,8 +1,6 @@
 export interface DialectOptions {
     name: string;
     hasSchema: boolean;
-    /** whether to write the db field name for primaryKey fields ('id').  Can cause errors in some dialects because field name is included twice in queries. */
-    canAliasPK: boolean;
     getForeignKeysQuery: (tableName: string, schemaName: string) => string;
     remapForeignKeysRow?: (tableName: string, row: FKRow) => FKRelation;
     countTriggerQuery: (tableName: string, schemaName: string) => string;

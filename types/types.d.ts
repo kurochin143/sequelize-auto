@@ -93,7 +93,7 @@ export declare function qNameSplit(qname: string): (string | null)[];
 /** Get combined schema.table name */
 export declare function qNameJoin(schema: string | undefined, table: string | undefined): string;
 /** Language of output model files */
-export declare type LangOption = "es5" | "es6" | "esm" | "ts" | "esmd";
+export declare type LangOption = "es5" | "es6" | "esm" | "ts";
 /** "c" camelCase |
  * "l" lower_case |
  * "o" original (db) |
@@ -137,6 +137,8 @@ export interface AutoOptions {
     lang?: LangOption;
     /** Whether to avoid creating alias property in relations */
     noAlias?: boolean;
+    /** Whether to skip writing index information */
+    noIndexes?: boolean;
     /** Whether to skip writing the init-models file */
     noInitModels?: boolean;
     /** Whether to skip writing the files */
@@ -151,6 +153,8 @@ export interface AutoOptions {
     singularize: boolean;
     /** Tables to skip exporting */
     skipTables?: string[];
+    /** Fields to skip exporting */
+    skipFields?: string[];
     /** Whether to indent with spaces instead of tabs (default true) */
     spaces?: boolean;
     /** File where database is stored (sqlite only) */
@@ -163,8 +167,10 @@ export interface AutoOptions {
     username?: string;
     /** Whether to export views (default false) */
     views?: boolean;
-    /** Add additional virtual fields */
-    virtualFields?: VirtualFieldsOption;
+    /** Primary Key Suffixes to trim (default "id") */
+    pkSuffixes?: string[];
+    /** Use `sequelize.define` instead of `init` for model initialization.  See issues #527, #559, #573 */
+    useDefine: boolean;
 }
 export declare type TSField = {
     special: string[];
@@ -177,15 +183,6 @@ export declare function pluralize(s: string): string;
 export declare function singularize(s: string): string;
 /** Change casing of val string according to opt [c|l|o|p|u]  */
 export declare function recase(opt: CaseOption | CaseFileOption | undefined, val: string | null, singular?: boolean): string;
-export interface VirtualFieldsColumnOptions {
-    type: string;
-}
-export declare type TableVirtualFields = {
-    [columnName: string]: VirtualFieldsColumnOptions;
-};
-export declare type VirtualFieldsOption = {
-    [tableName: string]: TableVirtualFields;
-};
 /**
  * @type Optional. Name of the type
  * @source Optional. File path of the type relative to file in the directory.
@@ -221,3 +218,6 @@ export interface TypeOverrides {
     tables?: TableTypeOverrides;
     nullableFieldType?: NullableFieldTypes;
 }
+export declare function makeTableName(opt: CaseOption | undefined, tableNameOrig: string | null, singular?: boolean, lang?: string): string;
+/** build the array of indentation strings */
+export declare function makeIndent(spaces: boolean | undefined, indent: number | undefined): string[];
