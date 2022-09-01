@@ -51,6 +51,11 @@ export class AutoRelater {
     const alias = this.getAlias(fkFieldName, spec.foreignSources.target_table as string, spec.foreignSources.source_table as string);
     const childAlias = this.getChildAlias(fkFieldName, spec.foreignSources.source_table as string, spec.foreignSources.target_table as string);
     const sourceProp = recase(this.caseProp, fkFieldName);
+    // NOTE this is a quick fix for belongsTo and hasMany, others are untested
+    let targetProp: string | undefined;
+    if (spec.foreignSources.target_column) {
+      targetProp = recase(this.caseProp, spec.foreignSources.target_column);
+    }
 
     // use "hasOne" cardinality if this FK is also a single-column Primary or Unique key; else "hasMany"
     const isOne = ((spec.isPrimaryKey && !_.some(fkFields, f => f.isPrimaryKey && f.source_column !== fkFieldName) ||
@@ -61,6 +66,7 @@ export class AutoRelater {
       parentModel: targetModel,
       parentProp: alias,
       parentTable: qNameJoin(spec.foreignSources.target_schema || schema, spec.foreignSources.target_table),
+      childId: targetProp,
       childModel: modelName,
       childProp: isOne ? singularize(childAlias) : pluralize(childAlias),
       childTable: qNameJoin(spec.foreignSources.source_schema || schema, spec.foreignSources.source_table),
