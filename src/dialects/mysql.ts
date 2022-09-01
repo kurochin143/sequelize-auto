@@ -4,7 +4,6 @@ import { addTicks, DialectOptions, FKRow, makeCondition } from "./dialect-option
 export const mysqlOptions: DialectOptions = {
   name: 'mysql',
   hasSchema: false,
-  canAliasPK: false,
   /**
    * Generates an SQL query that returns all foreign keys of a table.
    *
@@ -93,7 +92,7 @@ export const mysqlOptions: DialectOptions = {
   },
 
   showViewsQuery: (dbName?: string) => {
-    return `select table_name from information_schema.tables where table_type = 'VIEW' and table_schema = '${dbName}'`;
+    return `select TABLE_NAME as table_name from information_schema.tables where table_type = 'VIEW' and table_schema = '${dbName}'`;
   }
 
 };
